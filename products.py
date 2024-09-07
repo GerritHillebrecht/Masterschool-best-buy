@@ -3,7 +3,8 @@ from threading import Lock
 
 class Product:
     def __init__(
-            self, name: str,
+            self,
+            name: str,
             price: int | float,
             quantity: int,
             active=True
@@ -28,6 +29,13 @@ class Product:
         with self.lock:
             self.quantity = quantity
 
+            if quantity == 0:
+                self.deactivate()
+                return
+
+            if not self.is_active():
+                self.activate()
+
     def is_active(self) -> bool:
         """ Returns whether the product is shown in the store. """
         return self.active
@@ -50,10 +58,15 @@ class Product:
 
     def buy(self, quantity) -> float:
         """ Updates the stock and return the price of the order. Throws an error if out of stock. """
+
         # Lock the resource for parallel threads while handling.
         with self.lock:
             if self.quantity >= quantity:
                 self.quantity -= quantity
+
+                if self.quantity == 0:
+                    self.deactivate()
+
                 return quantity * self.price
 
             raise ValueError(
