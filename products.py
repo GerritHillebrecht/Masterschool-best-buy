@@ -2,7 +2,13 @@ from threading import Lock
 
 
 class Product:
-    def __init__(self, name, price, quantity, active=True):
+    def __init__(
+            self, name: str,
+            price: int | float,
+            quantity: int,
+            active=True
+    ):
+        """ Checks the validity of inputs and sets instance attributes. """
         # Assert correct inputs
         _check_initialization(name, price, quantity, active)
 
@@ -13,30 +19,37 @@ class Product:
         self.lock = Lock()
 
     def get_quantity(self) -> float:
+        """ Returns the current stock. """
         return self.quantity
 
     def set_quantity(self, quantity):
+        """ Updates the current stock. """
         # Lock the resource for parallel threads while handling.
         with self.lock:
             self.quantity = quantity
 
     def is_active(self) -> bool:
+        """ Returns whether the product is shown in the store. """
         return self.active
 
     def activate(self):
+        """ Activates the product for the store. """
         # Lock the resource for parallel threads while handling.
         with self.lock:
             self.active = True
 
     def deactivate(self):
+        """ Deactivates the product for the store. """
         # Lock the resource for parallel threads while handling.
         with self.lock:
             self.active = False
 
     def show(self) -> str:
+        """ Returns a printable string of all product information. """
         return f"{self.name}, Price: {self.price}, Quantity: {self.quantity}"
 
     def buy(self, quantity) -> float:
+        """ Updates the stock and return the price of the order. Throws an error if out of stock. """
         # Lock the resource for parallel threads while handling.
         with self.lock:
             if self.quantity >= quantity:
