@@ -14,7 +14,7 @@ def start(store: Store) -> None:
         # Quit the program if the last option is selected
         # (not ideal, but quit should always be the last option in the list).
         if choice == len(dispatcher):
-            print("Goodbye")
+            print("Thank you for shopping at best-buy.")
             return
 
         # Dispatch selected option.
