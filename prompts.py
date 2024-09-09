@@ -85,6 +85,7 @@ def prompt_order_item(store: Store) -> Product | None:
 
         if not 1 <= choice <= len(available_products):
             print(f"Select a product within 1 and {len(available_products)}")
+            continue
 
         return available_products[choice - 1]
 
