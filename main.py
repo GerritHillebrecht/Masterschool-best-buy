@@ -1,3 +1,17 @@
+"""
+main module
+
+This module initializes the store with a list of products and starts the store program.
+It includes functions to start the program and initialize the store inventory.
+
+Functions:
+    start(store: Store) -> None:
+        Prompts the user to select a store program option and dispatches the selection.
+
+    main():
+        Initializes the store instance with initial products and starts the store program.
+"""
+
 import prompts
 from products import Product
 from store import Store

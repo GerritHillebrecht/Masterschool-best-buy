@@ -1,3 +1,36 @@
+"""
+store module
+
+This module provides a `Store` class to manage a collection of product instances.
+It includes methods to handle product inventory, process orders, and check total stock.
+The module ensures thread safety using locks.
+
+Classes:
+    Store
+
+Class Store:
+    Represents a store containing product instances.
+
+    Methods:
+        __init__(self, products: list):
+            Initializes a new Store instance with a list of products.
+
+        add_product(self, product: Product) -> str:
+            Adds a product to the store. The product must be of type Product.
+
+        remove_product(self, product) -> str:
+            Removes a given product from the store.
+
+        get_total_quantity(self) -> int:
+            Returns the total quantity of all items in the store.
+
+        get_all_products(self) -> list[Product]:
+            Returns all active products.
+
+        order(self, shopping_list: list[tuple]) -> float:
+            Processes the quantities of items in the shopping list and returns the total price.
+"""
+
 from threading import Lock
 from products import Product
 
@@ -54,7 +87,7 @@ class Store:
             raise ValueError("The shopping-list must of type - wait for it - list.")
 
         for item in shopping_list:
-            if not isinstance(item[0], Product) or not (isinstance(item[1], float) or isinstance(item[1], int)):
+            if not isinstance(item[0], Product) or not isinstance(item[1], (float, int)):
                 raise ValueError("Provide a Product and the quantity as int / float.")
 
         with self.lock:

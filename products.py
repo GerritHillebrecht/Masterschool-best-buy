@@ -1,3 +1,49 @@
+"""
+products module
+
+This module provides a `Product` class to represent store products with
+attributes such as name, price, quantity, and active status. It includes
+methods to manage product stock, activation status, and purchase operations.
+The module ensures thread safety using locks.
+
+Classes:
+    Product
+
+Functions:
+    _check_initialization(name, price, quantity, active)
+
+Class Product:
+    Represents a store product with attributes name, price, quantity, and active status.
+
+    Methods:
+        __init__(self, name: str, price: int | float, quantity: int, active=True):
+            Initializes a new product instance with the given attributes.
+
+        get_quantity(self) -> float:
+            Returns the current stock quantity of the product.
+
+        set_quantity(self, quantity):
+            Updates the stock quantity of the product and adjusts its active status.
+
+        is_active(self) -> bool:
+            Returns whether the product is active in the store.
+
+        activate(self):
+            Activates the product for sale in the store.
+
+        deactivate(self):
+            Deactivates the product, making it unavailable for sale.
+
+        show(self) -> str:
+            Returns a string representation of the product's information.
+
+        buy(self, quantity) -> float:
+            Processes a purchase of the specified quantity, updates stock,
+            and returns the total price.
+
+Function _check_initialization:
+    Validates the initialization arguments for the Product class.
+"""
 from threading import Lock
 
 
@@ -93,7 +139,7 @@ def _check_initialization(name, price, quantity, active):
         raise ValueError("The product-name should not be empty.")
 
     # price
-    if not (isinstance(price, int) or isinstance(price, float)):
+    if not isinstance(price, (int, float)):
         raise TypeError("The price should be of type int or float.")
     if not price >= 0:
         raise ValueError("The price should be a positive number.")
