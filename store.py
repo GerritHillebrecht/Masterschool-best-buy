@@ -3,9 +3,14 @@ from products import Product
 
 
 class Store:
+    """
+    Creates a store containing Product instances.
+    Provide list of products for instantiation.
+    """
+
     def __init__(self, products: list):
         """ Inits the Store Instance with validity check. """
-        if not type(products) is list:
+        if not isinstance(products, list):
             raise ValueError("The products should be of type list.")
 
         for product in products:
@@ -45,11 +50,11 @@ class Store:
 
     def order(self, shopping_list: list[tuple]) -> float:
         """ Removes the shopping-list items quantities and return the total price. """
-        if not type(shopping_list) is list:
+        if not isinstance(shopping_list, list):
             raise ValueError("The shopping-list must of type - wait for it - list.")
 
         for item in shopping_list:
-            if not type(item[0]) is Product or not (type(item[1]) is float or type(item[1]) is int):
+            if not isinstance(item[0], Product) or not (isinstance(item[1], float) or isinstance(item[1], int)):
                 raise ValueError("Provide a Product and the quantity as int / float.")
 
         with self.lock:
