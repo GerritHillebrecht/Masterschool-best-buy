@@ -1,3 +1,34 @@
+"""
+prompts module
+
+This module provides functions to prompt user interactions for store operations.
+It includes functions to display the store menu, prompt for order items and quantities,
+and gather a shopping list.
+
+Functions:
+    prompt_store_menu(dispatcher: DispatcherList) -> int:
+        Prompts the user to select an option from the store menu.
+        Keeps prompting until a valid input is received.
+
+    prompt_order_item(store: Store) -> Product | None:
+        Prompts the user to select an item to buy from the store.
+        Returns the selected product instance or None if an empty string is given.
+
+    prompt_order_item_quantity(product: Product) -> int:
+        Prompts the user to enter the quantity of the selected product to buy.
+        Ensures the quantity is within the available stock.
+
+    prompt_shopping_list(store: Store) -> list[tuple[Product, int]]:
+        Prompts the user to create a shopping list by selecting products and quantities.
+        Returns the shopping list as a list of tuples (product, quantity).
+
+    prompt_integer(
+            input_text="Please enter a number: ",
+            error_text="Your input is not convertable to an integer."
+        ) -> int:
+        Prompts the user to enter an integer. Keeps prompting until a valid input is received.
+"""
+
 from dispatcher import DispatcherList
 from store import Store
 from products import Product
@@ -14,7 +45,7 @@ def prompt_store_menu(dispatcher: DispatcherList) -> int:
         # Print menu
         print("   Store Menu\n   ----------")
         for idx, disp in enumerate(dispatcher):
-            print(f"{idx + 1}. {disp["label"]}")
+            print(f'{idx + 1}. {disp["label"]}')
 
         choice = prompt_integer(
             "Please choose a number: ",
@@ -49,7 +80,7 @@ def prompt_order_item(store: Store) -> Product | None:
             choice = int(selection)
 
         except ValueError:
-            print(f"Select an available Product by entering a number")
+            print("Select an available Product by entering a number")
             continue
 
         if not 1 <= choice <= len(available_products):
