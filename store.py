@@ -54,7 +54,7 @@ class Store:
             raise ValueError("The shopping-list must of type - wait for it - list.")
 
         for item in shopping_list:
-            if not isinstance(item[0], Product) or not (isinstance(item[1], float) or isinstance(item[1], int)):
+            if not isinstance(item[0], Product) or not isinstance(item[1], (float, int)):
                 raise ValueError("Provide a Product and the quantity as int / float.")
 
         with self.lock:
