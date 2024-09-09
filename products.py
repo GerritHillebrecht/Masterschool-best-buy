@@ -93,7 +93,7 @@ def _check_initialization(name, price, quantity, active):
         raise ValueError("The product-name should not be empty.")
 
     # price
-    if not (isinstance(price, int) or isinstance(price, float)):
+    if not isinstance(price, (int, float)):
         raise TypeError("The price should be of type int or float.")
     if not price >= 0:
         raise ValueError("The price should be a positive number.")
