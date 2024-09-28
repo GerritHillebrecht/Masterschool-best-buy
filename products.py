@@ -1,10 +1,7 @@
 """
 products module
 
-This module provides a `Product` class to represent store products with
-attributes such as name, price, quantity, and active status. It includes
-methods to manage product stock, activation status, and purchase operations.
-The module ensures thread safety using locks.
+This module provides a `Product` class to represent store products with attributes such as name, price, quantity, and active status. It includes methods to manage product stock, activation status, and purchase operations. The module ensures thread safety using locks.
 
 Classes:
     Product
@@ -18,6 +15,12 @@ Class Product:
     Methods:
         __init__(self, name: str, price: int | float, quantity: int, active=True):
             Initializes a new product instance with the given attributes.
+
+        get_name(self):
+            Returns the name of the product.
+
+        get_price(self):
+            Returns the price of the product.
 
         get_quantity(self) -> float:
             Returns the current stock quantity of the product.
@@ -38,8 +41,7 @@ Class Product:
             Returns a string representation of the product's information.
 
         buy(self, quantity) -> float:
-            Processes a purchase of the specified quantity, updates stock,
-            and returns the total price.
+            Processes a purchase of the specified quantity, updates stock, and returns the total price.
 
 Function _check_initialization:
     Validates the initialization arguments for the Product class.
@@ -53,6 +55,8 @@ class Product:
     Will be initialized as active.
     """
 
+    __slots__ = ["_name", "_price", "_quantity", "_active", "_lock"]
+
     def __init__(
             self,
             name: str,
@@ -64,21 +68,27 @@ class Product:
         # Assert correct inputs
         _check_initialization(name, price, quantity, active)
 
-        self.name = name
-        self.price = price
-        self.quantity = quantity
-        self.active = active
-        self.lock = Lock()
+        self._name = name
+        self._price = price
+        self._quantity = quantity
+        self._active = active
+        self._lock = Lock()
+
+    def get_name(self):
+        return self._name
+
+    def get_price(self):
+        return self._price
 
     def get_quantity(self) -> float:
         """ Returns the current stock. """
-        return self.quantity
+        return self._quantity
 
     def set_quantity(self, quantity):
         """ Updates the current stock. """
         # Lock the resource for parallel threads while handling.
-        with self.lock:
-            self.quantity = quantity
+        with self._lock:
+            self._quantity = quantity
 
             if quantity == 0:
                 self.deactivate()
@@ -89,23 +99,23 @@ class Product:
 
     def is_active(self) -> bool:
         """ Returns whether the product is shown in the store. """
-        return self.active
+        return self._active
 
     def activate(self):
         """ Activates the product for the store. """
         # Lock the resource for parallel threads while handling.
-        with self.lock:
-            self.active = True
+        with self._lock:
+            self._active = True
 
     def deactivate(self):
         """ Deactivates the product for the store. """
         # Lock the resource for parallel threads while handling.
-        with self.lock:
-            self.active = False
+        with self._lock:
+            self._active = False
 
     def show(self) -> str:
         """ Returns a printable string of all product information. """
-        return f"{self.name}, Price: {self.price}, Quantity: {self.quantity}"
+        return f"{self._name}, Price: {self._price}, Quantity: {self._quantity}"
 
     def buy(self, quantity) -> float:
         """
@@ -114,17 +124,17 @@ class Product:
         """
 
         # Lock the resource for parallel threads while handling.
-        with self.lock:
-            if self.quantity >= quantity:
-                self.quantity -= quantity
+        with self._lock:
+            if self._quantity >= quantity:
+                self._quantity -= quantity
 
-                if self.quantity == 0:
+                if self._quantity == 0:
                     self.deactivate()
 
-                return quantity * self.price
+                return quantity * self._price
 
             raise ValueError(
-                f"Stock of {self.name} is insufficient ({self.quantity}) to buy {quantity}."
+                f"Stock of {self._name} is insufficient ({self._quantity}) to buy {quantity}."
             )
 
 

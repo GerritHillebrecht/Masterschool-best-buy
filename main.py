@@ -12,6 +12,7 @@ Functions:
         Initializes the store instance with initial products and starts the store program.
 """
 
+
 import prompts
 from products import Product
 from store import Store
