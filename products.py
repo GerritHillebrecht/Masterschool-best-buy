@@ -123,19 +123,17 @@ class Product:
         Throws an error if out of stock.
         """
 
-        # Lock the resource for parallel threads while handling.
-        with self._lock:
-            if self._quantity >= quantity:
-                self._quantity -= quantity
+        if self._quantity >= quantity:
+            self._quantity -= quantity
 
-                if self._quantity == 0:
-                    self.deactivate()
+            if self._quantity == 0:
+                self.deactivate()
 
-                return quantity * self._price
+            return quantity * self._price
 
-            raise ValueError(
-                f"Stock of {self._name} is insufficient ({self._quantity}) to buy {quantity}."
-            )
+        raise ValueError(
+            f"Stock of {self._name} is insufficient ({self._quantity}) to buy {quantity}."
+        )
 
 
 def _check_initialization(name, price, quantity, active):
