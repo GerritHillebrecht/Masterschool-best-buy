@@ -47,6 +47,7 @@ Function _check_initialization:
     Validates the initialization arguments for the Product class.
 """
 from threading import Lock
+from math import inf, isinf
 
 
 class Product:
@@ -61,7 +62,7 @@ class Product:
             self,
             name: str,
             price: int | float,
-            quantity: int,
+            quantity: int | float,
             active=True
     ):
         """ Checks the validity of inputs and sets instance attributes. """
@@ -74,23 +75,51 @@ class Product:
         self._active = active
         self._lock = Lock()
 
-    def get_name(self):
+    @property
+    def name(self):
         return self._name
 
-    def get_price(self):
+    @name.setter
+    def name(self, new_name):
+        if not new_name:
+            raise ValueError("Please provide a name")
+
+        if not isinstance(new_name, str):
+            raise TypeError("Please provide a str.")
+
+        self._name = new_name
+
+    @property
+    def price(self):
         return self._price
 
-    def get_quantity(self) -> float:
+    @price.setter
+    def price(self, new_price):
+        if not isinstance(new_price, (int, float)):
+            raise TypeError("Please provide the new price as an int or float.")
+
+        if not new_price >= 0:
+            raise ValueError("Please provide a price larger than or equal to 0.")
+
+        self._price = new_price
+
+    @property
+    def quantity(self) -> float:
         """ Returns the current stock. """
         return self._quantity
 
-    def set_quantity(self, quantity):
-        """ Updates the current stock. """
-        # Lock the resource for parallel threads while handling.
-        with self._lock:
-            self._quantity = quantity
+    @quantity.setter
+    def quantity(self, new_quantity):
+        if not isinstance(new_quantity, int):
+            raise TypeError("Please provide the new quantity as an int.")
 
-            if quantity == 0:
+        if not new_quantity >= 0:
+            raise ValueError("Please provide a quantity of at least 0.")
+
+        with self._lock:
+            self._quantity = new_quantity
+
+            if new_quantity == 0:
                 self.deactivate()
                 return
 
@@ -115,7 +144,7 @@ class Product:
 
     def show(self) -> str:
         """ Returns a printable string of all product information. """
-        return f"{self._name}, Price: {self._price}, Quantity: {self._quantity}"
+        return f"{self._name}, Price: {self._price}, Quantity: {self.quantity}"
 
     def buy(self, quantity) -> float:
         """
@@ -136,6 +165,68 @@ class Product:
         )
 
 
+class NonStockedProduct(Product):
+    def __init__(
+            self,
+            name: str,
+            price: int | float,
+            active=True
+    ):
+        super().__init__(
+            name=name,
+            price=price,
+            quantity=inf,
+            active=active
+        )
+
+    def show(self) -> str:
+        """ Returns a printable string of all product information. """
+        return f"{self._name}, Price: {self._price}, Quantity: Unlimited"
+
+
+class LimitedProduct(Product):
+    __slots__ = ["_maximum"]
+
+    def __init__(
+            self,
+            name: str,
+            price: int | float,
+            maximum: int,
+            quantity=inf,
+            active=True
+    ):
+        super().__init__(
+            name=name,
+            price=price,
+            quantity=quantity,
+            active=active
+        )
+
+        self._check_and_set_maximum_value(maximum)
+
+    @property
+    def maximum(self):
+        return self._maximum
+
+    @maximum.setter
+    def maximum(self, new_maximum):
+        self._check_and_set_maximum_value(new_maximum)
+
+    def show(self):
+        """ Returns a printable string of all product information. """
+        return f"{self._name}, Price: {self._price}, limited to {self.maximum} per order!"
+
+    def _check_and_set_maximum_value(self, maximum):
+        if not isinstance(maximum, int):
+            raise TypeError("maximum should be of type int.")
+
+        if maximum < 1:
+            raise ValueError("The maximum value should be at least 1.")
+
+        with self._lock:
+            self._maximum = maximum
+
+
 def _check_initialization(name, price, quantity, active):
     """
     Checks the validity of the __init__ arguments.
@@ -153,8 +244,8 @@ def _check_initialization(name, price, quantity, active):
         raise ValueError("The price should be a positive number.")
 
     # quantity
-    if not isinstance(quantity, int):
-        raise TypeError("The quantity should be a whole number as int.")
+    if not isinstance(quantity, (int, float)):
+        raise TypeError("The quantity should be a whole number as int or infinity.")
     if not quantity >= 0:
         raise ValueError("The quantity cannot be negative.")
 
