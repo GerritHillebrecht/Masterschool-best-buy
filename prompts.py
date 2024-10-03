@@ -1,19 +1,23 @@
 """
 prompts module
 
-This module provides functions to prompt the user for various inputs related to store operations. It includes functions to prompt for menu selections, product selections, and quantities, as well as a utility function to prompt for integers.
+This module provides functions to prompt the user for various inputs related to store operations.
+It includes functions to prompt for menu selections, product selections, and quantities,
+as well as a utility function to prompt for integers.
 
 Functions:
     prompt_store_menu(dispatcher: DispatcherList) -> int:
         Prompts the user for a selection from the store menu and returns the selected option index.
 
     prompt_order_item(store) -> Product | None:
-        Prompts the user to select an item to buy from the store and returns the selected product instance.
+        Prompts the user to select an item to buy from the store and returns the
+        selected product instance.
 
     prompt_order_item_quantity(product: Product) -> int | None:
-        Prompts the user for the quantity of the selected product to buy and returns the validated quantity.
+        Prompts the user for the quantity of the selected product to buy and returns
+        the validated quantity.
 
-    prompt_integer(input_text="Please enter a number: ", error_text="Your input is not convertable to an integer.") -> int | None:
+    prompt_integer(input_text, error_text) -> int | None:
         Prompts the user for an integer input and returns the converted integer.
 """
 

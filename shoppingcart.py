@@ -1,7 +1,9 @@
 """
 shoppingCart module
 
-This module provides a `ShoppingCart` class to manage the items in a shopping cart. It includes methods to add items, clear the cart, and retrieve information about the items in the cart.
+This module provides a `ShoppingCart` class to manage the items in a shopping cart.
+It includes methods to add items, clear the cart,
+and retrieve information about the items in the cart.
 
 Classes:
     ShoppingCart

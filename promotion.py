@@ -1,7 +1,10 @@
 """
 promotion module
 
-This module provides abstract and concrete classes for different types of promotions that can be applied to products in a store. It includes a base `Promotion` class and specific implementations for no promotion, percentage discount promotions, and "buy X get one free" promotions.
+This module provides abstract and concrete classes for different types
+of promotions that can be applied to products in a store.
+It includes a base `Promotion` class and specific implementations for no promotion,
+percentage discount promotions, and "buy X get one free" promotions.
 
 Classes:
     Promotion

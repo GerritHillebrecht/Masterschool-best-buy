@@ -1,7 +1,10 @@
 """
 products module
 
-This module provides a `Product` class to represent store products with attributes such as name, price, quantity, and active status. It includes methods to manage product stock, activation status, and purchase operations. Additionally, it includes specialized product classes for non-stocked and limited products.
+This module provides a `Product` class to represent store products with attributes
+such as name, price, quantity, and active status. It includes methods to manage product stock,
+activation status, and purchase operations.
+Additionally, it includes specialized product classes for non-stocked and limited products.
 
 Classes:
     Product
@@ -15,7 +18,8 @@ Class Product:
     Represents a store product with attributes name, price, quantity, and active status.
 
     Methods:
-        __init__(self, name: str, price: int | float, quantity: int | float, promotion: Promotion = NoPromotion("No Promotion"), active=True):
+        __init__(self, name: str, price: int | float, quantity: int | float,
+            promotion: Promotion = NoPromotion("No Promotion"), active=True):
             Initializes a new product instance with the given attributes.
 
         __str__(self):
@@ -83,7 +87,8 @@ Class LimitedProduct:
     Represents a store product with a maximum limit.
 
     Methods:
-        __init__(self, name: str, price: int | float, maximum: int, promotion: Promotion = NoPromotion("No Promotion"), quantity=inf, active=True):
+        __init__(self, name: str, price: int | float, maximum: int, promotion: Promotion = NoPromotion("No Promotion"),
+        quantity=inf, active=True):
             Initializes a new limited product instance with the given attributes.
 
         __str__(self):
@@ -239,7 +244,7 @@ class Product:
 
     @property
     def promotion(self):
-        """ Returns the private property prmotion. """
+        """ Returns the private property promotion. """
         return self._promotion
 
     def is_active(self) -> bool:

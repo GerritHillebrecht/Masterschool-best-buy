@@ -1,7 +1,9 @@
 """
 store module
 
-This module provides a `Store` class to manage a collection of products. It includes methods to add and remove products, check stock, and merge stores. The store also maintains a shopping cart for managing customer purchases.
+This module provides a `Store` class to manage a collection of products.
+It includes methods to add and remove products, check stock, and merge stores.
+The store also maintains a shopping cart for managing customer purchases.
 
 Classes:
     Store
@@ -50,13 +52,15 @@ Class Store:
             Prints an unrestricted list of all products.
 
         start_order(self) -> None:
-            Prompts the user for a shopping list by listing all available products and prompting the quantity the user wants to acquire.
+            Prompts the user for a shopping list by listing all
+            available products and prompting the quantity the user wants to acquire.
 
         _order(self) -> float:
             Removes the shopping-list item's quantities and returns the total price.
 
         _finalize_order(self) -> None:
-            Finishes the order by printing the bill and the amount of items bought and resetting the shopping-cart.
+            Finishes the order by printing the bill and the amount of items bought
+            and resetting the shopping-cart.
 """
 
 from math import inf, isinf
