@@ -46,8 +46,8 @@ Class Product:
 Function _check_initialization:
     Validates the initialization arguments for the Product class.
 """
-from threading import Lock
-from math import inf, isinf
+from math import inf
+from promotion import Promotion, NoPromotion
 
 
 class Product:
@@ -56,13 +56,14 @@ class Product:
     Will be initialized as active.
     """
 
-    __slots__ = ["_name", "_price", "_quantity", "_active", "_lock"]
+    __slots__ = ["_name", "_price", "_quantity", "_promotion", "_active"]
 
     def __init__(
             self,
             name: str,
             price: int | float,
             quantity: int | float,
+            promotion: Promotion = NoPromotion("No Promotion"),
             active=True
     ):
         """ Checks the validity of inputs and sets instance attributes. """
@@ -72,8 +73,8 @@ class Product:
         self._name = name
         self._price = price
         self._quantity = quantity
+        self._promotion = promotion
         self._active = active
-        self._lock = Lock()
 
     @property
     def name(self):
@@ -116,15 +117,18 @@ class Product:
         if not new_quantity >= 0:
             raise ValueError("Please provide a quantity of at least 0.")
 
-        with self._lock:
-            self._quantity = new_quantity
+        self._quantity = new_quantity
 
-            if new_quantity == 0:
-                self.deactivate()
-                return
+        if new_quantity == 0:
+            self.deactivate()
+            return
 
-            if not self.is_active():
-                self.activate()
+        if not self.is_active():
+            self.activate()
+
+    @property
+    def discount(self):
+        return self._promotion
 
     def is_active(self) -> bool:
         """ Returns whether the product is shown in the store. """
@@ -132,19 +136,15 @@ class Product:
 
     def activate(self):
         """ Activates the product for the store. """
-        # Lock the resource for parallel threads while handling.
-        with self._lock:
-            self._active = True
+        self._active = True
 
     def deactivate(self):
         """ Deactivates the product for the store. """
-        # Lock the resource for parallel threads while handling.
-        with self._lock:
-            self._active = False
+        self._active = False
 
     def show(self) -> str:
         """ Returns a printable string of all product information. """
-        return f"{self._name}, Price: {self._price}, Quantity: {self.quantity}"
+        return f"{self._name}, Price: {self._price}, Quantity: {self.quantity}, Promotion: {self._promotion.name}"
 
     def buy(self, quantity) -> float:
         """
@@ -164,24 +164,32 @@ class Product:
             f"Stock of {self._name} is insufficient ({self._quantity}) to buy {quantity}."
         )
 
+    def set_promotion(self, promotion):
+        if not isinstance(promotion, Promotion):
+            raise TypeError("The promotion should be of type Promotion or descendant child")
+
+        self._promotion = promotion
+
 
 class NonStockedProduct(Product):
     def __init__(
             self,
             name: str,
             price: int | float,
+            promotion: Promotion = NoPromotion("No Promotion"),
             active=True
     ):
         super().__init__(
             name=name,
             price=price,
             quantity=inf,
-            active=active
+            active=active,
+            promotion=promotion
         )
 
     def show(self) -> str:
         """ Returns a printable string of all product information. """
-        return f"{self._name}, Price: {self._price}, Quantity: Unlimited"
+        return f"{self._name}, Price: {self._price}, Quantity: Unlimited, Promotion: {self._promotion.name}"
 
 
 class LimitedProduct(Product):
@@ -192,14 +200,16 @@ class LimitedProduct(Product):
             name: str,
             price: int | float,
             maximum: int,
+            promotion: Promotion = NoPromotion("No Promotion"),
             quantity=inf,
-            active=True
+            active=True,
     ):
         super().__init__(
             name=name,
             price=price,
             quantity=quantity,
-            active=active
+            active=active,
+            promotion=promotion,
         )
 
         self._check_and_set_maximum_value(maximum)
@@ -214,7 +224,7 @@ class LimitedProduct(Product):
 
     def show(self):
         """ Returns a printable string of all product information. """
-        return f"{self._name}, Price: {self._price}, limited to {self.maximum} per order!"
+        return f"{self._name}, Price: {self._price}, Promotion: {self._promotion.name}, limited to {self.maximum} per order!"
 
     def _check_and_set_maximum_value(self, maximum):
         if not isinstance(maximum, int):
@@ -223,8 +233,7 @@ class LimitedProduct(Product):
         if maximum < 1:
             raise ValueError("The maximum value should be at least 1.")
 
-        with self._lock:
-            self._maximum = maximum
+        self._maximum = maximum
 
 
 def _check_initialization(name, price, quantity, active):

@@ -50,10 +50,11 @@ Class Store:
             Finishes the order by printing the bill and the amount of items bought and resetting the shopping-cart.
 """
 
-from threading import Lock
-from products import Product
-from shoppinglist import ShoppingList
+from math import inf, isinf
+
 import prompts
+from products import Product
+from shoppingcart import ShoppingCart
 
 
 class Store:
@@ -62,10 +63,15 @@ class Store:
     Provide list of products for instantiation.
     """
 
-    __slots__ = ["_products", "_lock", "_cart"]
+    __slots__ = ["_products", "_shopping_cart"]
 
     def __len__(self):
-        return len(self._products)
+        return sum(
+            product.quantity
+            if not isinf(product.quantity)
+            else 0
+            for product in self._products
+        )
 
     def __init__(self, products: list[Product]):
         """ Inits the Store Instance with validity check. """
@@ -77,24 +83,27 @@ class Store:
                 raise ValueError("Store products must be instances of Product")
 
         self._products = products
-        self._lock = Lock()
         # I'm aware the cart should be connected to the user and not the store, but
         # for this single-user store it's sufficient.
-        self._cart = ShoppingList()
+        self._shopping_cart = ShoppingCart()
 
-    def get_shopping_cart(self) -> ShoppingList:
+    @property
+    def shopping_cart(self) -> ShoppingCart:
         """
         Returns the Shopping-Cart of the store.
         :return: The Shopping-Cart of the store
         """
-        return self._cart
+        return self._shopping_cart
+
+    @property
+    def products(self):
+        return self._products
 
     def add_product(self, product: Product) -> str:
         """ Adds a product to the store. Must be of type Product. """
         if isinstance(product, Product):
-            with self._lock:
-                self._products.append(product)
-            return product.get_name()
+            self._products.append(product)
+            return product.name
 
         raise ValueError("Store products must be instances of Product")
 
@@ -103,15 +112,10 @@ class Store:
         if not isinstance(product, Product):
             raise ValueError("Store products must be instances of Product")
 
-        with self._lock:
-            if any(p == product for p in self._products):
-                self._products.remove(product)
+        if any(p == product for p in self._products):
+            self._products.remove(product)
 
-        return product.get_name()
-
-    def get_total_quantity(self) -> int:
-        """ Returns the stock of all items in the store. """
-        return sum(product.get_quantity() for product in self._products)
+        return product.name
 
     def get_all_products(self):
         """ Return all products """
@@ -127,14 +131,24 @@ class Store:
     def get_all_available_products(self) -> list[Product]:
         """ Return all items in stock """
         return list(filter(
-            lambda item: item.get_quantity() > 0,
+            self._product_in_stock,
             self.get_all_active_products()
         ))
 
-    def show_all_products(self):
+    def _product_in_stock(self, product: Product):
+        return product.quantity > 0
+
+    def get_all_available_products_for_current_cart(self):
+        return list(filter(
+            lambda item: self.shopping_cart[item.name] <= item.maximum
+            if hasattr(item, "maximum")
+            else inf,
+            self.get_all_available_products()
+        ))
+
+    def show_all_products(self) -> None:
         """
         Prints an unrestricted list of all products
-        :return:
         """
         product_infos = [
             product.show()
@@ -151,7 +165,7 @@ class Store:
         """
 
         # Guard clause for empty shop
-        if len(self.get_all_available_products()) == 0:
+        if len(self.get_all_available_products_for_current_cart()) == 0:
             print("Currently all items are out of stock.")
             return
 
@@ -169,43 +183,49 @@ class Store:
             if quantity is None:
                 return self._finalize_order()
 
-            shopping_cart = self.get_shopping_cart()
-            available_stock = order_item.get_quantity() - shopping_cart.get_item_quantity(order_item)
+            available_stock = order_item.quantity - self.shopping_cart[order_item.name]
 
             if available_stock >= quantity:
-                shopping_cart.add_item(order_item, quantity)
+                self.shopping_cart.add_item(order_item, quantity)
 
             else:
                 print(f"Only {available_stock} items are in stock.", end="\n\n")
 
             # Print the current shopping-list-state.
-            print("_____________")
-            print("Shopping-Cart contains:")
-            for name, quantity in self._cart.get_cart().items():
+            print(
+                "_____________",
+                "\nShopping-Cart contains:"
+            )
+            for name, quantity in self.shopping_cart.cart.items():
                 print(f"{name}: {quantity}")
-            print("_____________", end="\n\n")
-            print("What else do you want to buy?")
+
+            print(
+                "_____________",
+                "\n\nWhat else do you want to buy?"
+            )
 
     def _order(self) -> float:
         """ Removes the shopping-list item's quantities and returns the total price. """
+        bill = 0
+        cart = self.shopping_cart.cart
 
-        with self._lock:
-            bill = 0
+        for product_name, quantity in cart.items():
 
-            shopping_cart = self._cart.get_cart()
+            product = next(
+                (p for p in self._products if p.name == product_name)
+            )
 
-            for item in shopping_cart.items():
-                product_name, quantity = item
+            try:
+                # first check if product is in stock
+                product.buy(quantity)
 
-                product = next(
-                    (p for p in self._products if p.get_name() == product_name)
+                # update bill if it's available
+                bill += product.discount.apply_promotion(
+                    price=product.price,
+                    quantity=quantity
                 )
-
-                try:
-                    product.buy(quantity)
-                    bill += product.get_price() * quantity
-                except ValueError:
-                    print(f"{product.get_name()} is out of stock.")
+            except ValueError:
+                print(f"{product.name} is out of stock.")
 
         return bill
 
@@ -217,11 +237,11 @@ class Store:
         bill = self._order()
 
         amount_products = sum(
-            quantity for name, quantity in self._cart.get_cart().items()
+            quantity for quantity in self._shopping_cart.cart.values()
         )
 
         # Reset the cart
-        self._cart.clear_cart()
+        self._shopping_cart.clear()
 
         print("********")
         print(f"Order made! Total payment: ${bill} for {amount_products} products.")

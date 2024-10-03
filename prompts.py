@@ -54,19 +54,19 @@ def prompt_order_item(store: Store) -> Product | None:
     :param store: The store instance.
     :return: The selected product instance, None if empty string is given.
     """
-    shopping_cart = store.get_shopping_cart()
+    shopping_cart = store.shopping_cart
 
     while True:
         # Fetch product quantity every time the user gets prompted for accurate in-stock-data.
         available_products: list[Product] = list(
             filter(
-                lambda item: item.get_quantity() - shopping_cart.get_item_quantity(item) > 0,
-                store.get_all_available_products()
+                lambda item: (item.quantity - shopping_cart[item.name]) > 0,
+                store.get_all_available_products_for_current_cart()
             )
         )
 
         for idx, product in enumerate(available_products):
-            print(f"{idx + 1}. {product.get_name()}")
+            print(f"{idx + 1}. {product.name}")
 
         try:
             selection = input("Which product # do you want? ")
@@ -101,7 +101,7 @@ def prompt_order_item_quantity(product: Product) -> int | None:
             "Select a quantity by entering a number"
         )
 
-        available_stock = product.get_quantity()
+        available_stock = product.quantity
 
         if quantity is None:
             return None

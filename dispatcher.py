@@ -35,7 +35,7 @@ dispatcher = [
     {
         "label": "Show total amount in store",
         "func": lambda store: print(
-            f"Total of {store.get_total_quantity()} items in store."
+            f"Total of {len(store)} items in store."
         )
     },
     {
