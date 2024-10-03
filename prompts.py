@@ -1,25 +1,28 @@
 """
 prompts module
 
-This module provides functions to prompt user interactions for store operations. It includes functions to display the store menu, prompt for order items and quantities, and gather a shopping list.
+This module provides functions to prompt the user for various inputs related to store operations.
+It includes functions to prompt for menu selections, product selections, and quantities,
+as well as a utility function to prompt for integers.
 
 Functions:
     prompt_store_menu(dispatcher: DispatcherList) -> int:
-        Prompts the user to select an option from the store menu. Keeps prompting until a valid input is received.
+        Prompts the user for a selection from the store menu and returns the selected option index.
 
-    prompt_order_item(store: Store) -> Product | None:
-        Prompts the user to select an item to buy from the store. Returns the selected product instance or None if an empty string is given.
+    prompt_order_item(store) -> Product | None:
+        Prompts the user to select an item to buy from the store and returns the
+        selected product instance.
 
     prompt_order_item_quantity(product: Product) -> int | None:
-        Prompts the user to enter the quantity of the selected product to buy. Ensures the quantity is within the available stock.
+        Prompts the user for the quantity of the selected product to buy and returns
+        the validated quantity.
 
-    prompt_integer(input_text="Please enter a number: ", error_text="Your input is not convertable to an integer.") -> int | None:
-        Prompts the user to enter an integer. Keeps prompting until a valid input is received.
+    prompt_integer(input_text, error_text) -> int | None:
+        Prompts the user for an integer input and returns the converted integer.
 """
 
 from dispatcher import DispatcherList
 from products import Product
-from store import Store
 
 
 def prompt_store_menu(dispatcher: DispatcherList) -> int:
@@ -47,26 +50,26 @@ def prompt_store_menu(dispatcher: DispatcherList) -> int:
         return choice
 
 
-def prompt_order_item(store: Store) -> Product | None:
+def prompt_order_item(store) -> Product | None:
     """
     Prompts the user for the item(s) he wants to buy. Loops until an empty string is given.
     Returns None if an empty string is given. Items are selected by index, input is validated.
     :param store: The store instance.
-    :return: The selected product instance, None if empty string is given.
+    :return: The selected product instance, returns None if string is empty.
     """
-    shopping_cart = store.get_shopping_cart()
+    shopping_cart = store.shopping_cart
 
     while True:
         # Fetch product quantity every time the user gets prompted for accurate in-stock-data.
         available_products: list[Product] = list(
             filter(
-                lambda item: item.get_quantity() - shopping_cart.get_item_quantity(item) > 0,
-                store.get_all_available_products()
+                lambda item: (item.quantity - shopping_cart[item.name]) > 0,
+                store.get_all_available_products_for_current_cart()
             )
         )
 
         for idx, product in enumerate(available_products):
-            print(f"{idx + 1}. {product.get_name()}")
+            print(f"{idx + 1}. {product.name}")
 
         try:
             selection = input("Which product # do you want? ")
@@ -101,7 +104,7 @@ def prompt_order_item_quantity(product: Product) -> int | None:
             "Select a quantity by entering a number"
         )
 
-        available_stock = product.get_quantity()
+        available_stock = product.quantity
 
         if quantity is None:
             return None

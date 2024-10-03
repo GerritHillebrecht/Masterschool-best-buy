@@ -1,7 +1,8 @@
 """
 dispatcher module
 
-This module provides a type definition for the dispatcher and a list of dispatcher actions. Each action is mapped to a label and a corresponding function to manage store operations.
+This module provides a type definition for the dispatcher and a list of dispatcher actions.
+Each action is mapped to a label and a corresponding function to manage store operations.
 
 Classes:
     Dispatcher
@@ -35,7 +36,7 @@ dispatcher = [
     {
         "label": "Show total amount in store",
         "func": lambda store: print(
-            f"Total of {store.get_total_quantity()} items in store."
+            f"Total of {len(store)} items in store."
         )
     },
     {

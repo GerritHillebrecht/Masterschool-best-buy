@@ -8,12 +8,12 @@ def test_product_creation():
 
 
 def test_invalid_product():
-    with pytest.raises(TypeError) as e_info:
-        invalid_product = Product(price=249, quantity=200)
-    with pytest.raises(ValueError) as e_info:
-        invalid_product = Product(name="", price=249, quantity=200)
-    with pytest.raises(ValueError) as e_info:
-        invalid_product = Product(name="Airpods Pro 2", price=-249, quantity=200)
+    with pytest.raises(TypeError):
+        Product(price=249, quantity=200)
+    with pytest.raises(ValueError):
+        Product(name="", price=249, quantity=200)
+    with pytest.raises(ValueError):
+        Product(name="Airpods Pro 2", price=-249, quantity=200)
 
 
 def test_product_out_of_stock():
@@ -30,5 +30,5 @@ def test_product_transaction():
 
 def test_buy_out_of_stock():
     product = Product(name="Airpods Pro 2", price=249, quantity=200)
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception):
         product.buy(250)
