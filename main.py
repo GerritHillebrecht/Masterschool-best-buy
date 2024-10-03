@@ -2,14 +2,15 @@
 main module
 
 This module initializes the store with a list of products and starts the store program.
-It includes functions to start the program and initialize the store inventory.
+It includes functions to start the program and initialize the store inventory with promotions.
 
 Functions:
     start(store: Store) -> None:
         Prompts the user to select a store program option and dispatches the selection.
 
     main():
-        Initializes the store instance with initial products and starts the store program.
+        Initializes the store instance with initial products and promotions,
+        and starts the store program.
 """
 
 import prompts
@@ -17,6 +18,14 @@ from products import Product, NonStockedProduct, LimitedProduct
 from promotion import PromotionEveryXFree, PromotionDiscountPercent
 from store import Store
 from dispatcher import dispatcher
+
+"""
+Disclaimer: Crashes randomly after adding items to the shopping-cart.
+Removed the thread-locks, but still does so. The value for "choice" is not set
+sometimes. I would usually spent some time debugging the issue, but since i'm still
+unwell, this has to do for now. Maybe you don't get the error while trying and can
+overlook it? ;)
+"""
 
 
 def start(store: Store) -> None:
@@ -56,7 +65,7 @@ def main():
             "MacBook Air M2",
             price=1450,
             quantity=100,
-            promotion=promotions["twenty_percent_off"]
+            # promotion=promotions["twenty_percent_off"]
         ),
         Product(
             "Bose QuietComfort Earbuds",
@@ -82,6 +91,7 @@ def main():
             promotion=promotions["free"]
         )
     ]
+
     best_buy = Store(product_list)
     start(best_buy)
 

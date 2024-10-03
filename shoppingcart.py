@@ -1,3 +1,37 @@
+"""
+shoppingCart module
+
+This module provides a `ShoppingCart` class to manage the items in a shopping cart. It includes methods to add items, clear the cart, and retrieve information about the items in the cart.
+
+Classes:
+    ShoppingCart
+
+Class ShoppingCart:
+    Represents a shopping cart that holds products and their quantities.
+
+    Methods:
+        __init__(self):
+            Initializes the Shopping-Cart class instance.
+
+        __str__(self) -> str:
+            Returns the dictionary representing the cart as a string.
+
+        __len__(self) -> int:
+            Gets the number of different items in the shopping cart.
+
+        __getitem__(self, product_name: str) -> int | float:
+            Gets the quantity of a specific product in the shopping cart.
+
+        cart(self):
+            Returns the private property _cart.
+
+        add_item(self, product: Product, quantity: int | float) -> None:
+            Adds an item to the shopping cart.
+
+        clear(self) -> None:
+            Clears the shopping cart.
+"""
+
 from products import Product
 
 

@@ -1,7 +1,8 @@
 """
 dispatcher module
 
-This module provides a type definition for the dispatcher and a list of dispatcher actions. Each action is mapped to a label and a corresponding function to manage store operations.
+This module provides a type definition for the dispatcher and a list of dispatcher actions.
+Each action is mapped to a label and a corresponding function to manage store operations.
 
 Classes:
     Dispatcher

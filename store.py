@@ -1,32 +1,38 @@
 """
 store module
 
-This module provides a `Store` class to manage a collection of product instances. It includes methods to handle product inventory, manage a shopping cart, and process orders. The module ensures thread safety using locks.
+This module provides a `Store` class to manage a collection of products. It includes methods to add and remove products, check stock, and merge stores. The store also maintains a shopping cart for managing customer purchases.
 
 Classes:
     Store
 
 Class Store:
-    Represents a store containing product instances.
+    Represents a store containing Product instances.
 
     Methods:
         __init__(self, products: list[Product]):
-            Initializes a new Store instance with a list of products.
+            Initializes the Store instance with a list of products.
 
-        __len__(self):
-            Returns the number of products in the store.
+        __len__(self) -> int:
+            Returns the sum of all product stock.
 
-        get_shopping_cart(self) -> ShoppingList:
+        __contains__(self, item: Product) -> bool:
+            Checks if a product is in stock.
+
+        __add__(self, other):
+            Merges two stores together, combining their products.
+
+        shopping_cart(self) -> ShoppingCart:
             Returns the shopping cart of the store.
 
+        products(self):
+            Returns the list of products in the store.
+
         add_product(self, product: Product) -> str:
-            Adds a product to the store. The product must be of type Product.
+            Adds a product to the store.
 
-        remove_product(self, product) -> str:
-            Removes a given product from the store.
-
-        get_total_quantity(self) -> int:
-            Returns the total quantity of all items in the store.
+        remove_product(self, product: Product) -> str:
+            Removes a product from the store.
 
         get_all_products(self):
             Returns all products in the store.
@@ -35,10 +41,13 @@ Class Store:
             Returns all active products in the store.
 
         get_all_available_products(self) -> list[Product]:
-            Returns all items in stock in the store.
+            Returns all items in stock.
 
-        show_all_products(self):
-            Prints an unrestricted list of all products in the store.
+        get_all_available_products_for_current_cart(self):
+            Returns all available products that aren't already fully added to the cart.
+
+        show_all_products(self) -> None:
+            Prints an unrestricted list of all products.
 
         start_order(self) -> None:
             Prompts the user for a shopping list by listing all available products and prompting the quantity the user wants to acquire.
@@ -51,7 +60,6 @@ Class Store:
 """
 
 from math import inf, isinf
-
 import prompts
 from products import Product
 from shoppingcart import ShoppingCart
@@ -63,18 +71,10 @@ class Store:
     Provide list of products for instantiation.
     """
 
-    __slots__ = ["_products", "_shopping_cart"]
-
-    def __len__(self):
-        return sum(
-            product.quantity
-            if not isinf(product.quantity)
-            else 0
-            for product in self._products
-        )
+    __slots__ = ("_products", "_shopping_cart")
 
     def __init__(self, products: list[Product]):
-        """ Inits the Store Instance with validity check. """
+        """ Initializes the Store Instance with validity check. """
         if not isinstance(products, list):
             raise ValueError("The products should be of type list.")
 
@@ -87,6 +87,60 @@ class Store:
         # for this single-user store it's sufficient.
         self._shopping_cart = ShoppingCart()
 
+    def __len__(self) -> int:
+        """
+        Returns the sum of all product stock.
+        """
+        return sum(
+            product.quantity
+            if not isinf(product.quantity)
+            else 0
+            for product in self._products
+        )
+
+    def __contains__(self, item: Product) -> bool:
+        """
+        Checks if a product is in stock.
+        :param item: The product to check.
+        """
+        return item in self._products
+
+    def __add__(self, other):
+        """
+        Merge two stores together. Loosing data while doing so.
+        :param other: The store you want to merge with the current one.
+        :return: Returns a new (badly) merged store.
+        """
+        # Merging two stores (at least at this state) makes close to zero sense.
+        # Merging with overwriting promotion and price properties of merged store.
+        # Stock is added together.
+        # Shopping Cart is reset (on purpose).
+
+        # Get a set of unique product-names.
+        all_products = set(
+            list(p.name for p in self._products) + list(p.name for p in other.products)
+        )
+
+        # Loop the product names to create a new list of products to pass to the new store
+        new_products = []
+        for p_name in all_products:
+            # Get current product
+            product_store = next(
+                product for product in self._products if product.name == p_name
+            )
+
+            # Get product of the store to merge
+            product_other_store = next(
+                product for product in other.products if product.name == p_name
+            )
+
+            price = product_store.price or product_other_store.price
+            quantity = (product_store.quantity or 0) + (product_other_store.quantity or 0)
+            promotion = product_store.promotion or product_other_store.promotion
+            new_products.append(Product(p_name, price=price, quantity=quantity, promotion=promotion))
+
+        return Store(new_products)
+
     @property
     def shopping_cart(self) -> ShoppingCart:
         """
@@ -97,6 +151,7 @@ class Store:
 
     @property
     def products(self):
+        """ Returns the private property products. """
         return self._products
 
     def add_product(self, product: Product) -> str:
@@ -131,14 +186,12 @@ class Store:
     def get_all_available_products(self) -> list[Product]:
         """ Return all items in stock """
         return list(filter(
-            self._product_in_stock,
+            lambda product: product.quantity > 0,
             self.get_all_active_products()
         ))
 
-    def _product_in_stock(self, product: Product):
-        return product.quantity > 0
-
     def get_all_available_products_for_current_cart(self):
+        """ Returns all available products that aren't already fully added to the cart. """
         return list(filter(
             lambda item: self.shopping_cart[item.name] <= item.maximum
             if hasattr(item, "maximum")
@@ -151,7 +204,7 @@ class Store:
         Prints an unrestricted list of all products
         """
         product_infos = [
-            product.show()
+            product
             for product in self.get_all_products()
         ]
 
@@ -220,7 +273,7 @@ class Store:
                 product.buy(quantity)
 
                 # update bill if it's available
-                bill += product.discount.apply_promotion(
+                bill += product.promotion.apply_promotion(
                     price=product.price,
                     quantity=quantity
                 )

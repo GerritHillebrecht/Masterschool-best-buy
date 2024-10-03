@@ -1,3 +1,58 @@
+"""
+promotion module
+
+This module provides abstract and concrete classes for different types of promotions that can be applied to products in a store. It includes a base `Promotion` class and specific implementations for no promotion, percentage discount promotions, and "buy X get one free" promotions.
+
+Classes:
+    Promotion
+    NoPromotion
+    PromotionDiscountPercent
+    PromotionEveryXFree
+
+Class Promotion:
+    An abstract base class for promotions.
+
+    Methods:
+        __init__(self, name: str):
+            Initializes the promotion with a name.
+
+        name(self):
+            Returns the name of the promotion.
+
+        name(self, new_name):
+            Sets the name of the promotion.
+
+        apply_promotion(self, price: int | float, quantity: int | float) -> int | float:
+            Abstract method to apply the promotion to a given price and quantity.
+
+Class NoPromotion:
+    A concrete class for no promotion.
+
+    Methods:
+        apply_promotion(self, price: int | float, quantity: int | float) -> int | float:
+            Returns the total price without any promotion.
+
+Class PromotionDiscountPercent:
+    A concrete class for percentage discount promotions.
+
+    Methods:
+        __init__(self, name: str, percent: int):
+            Initializes the percentage discount promotion with a name and discount percent.
+
+        apply_promotion(self, price: int | float, quantity: int | float) -> int | float:
+            Applies the percentage discount to the total price.
+
+Class PromotionEveryXFree:
+    A concrete class for "buy X get one free" promotions.
+
+    Methods:
+        __init__(self, name: str, x: int, percent=100):
+            Initializes the "buy X get one free" promotion with a name, X value, and optional discount percent.
+
+        apply_promotion(self, price: int | float, quantity: int | float) -> int | float:
+            Applies the "buy X get one free" promotion to the total price.
+"""
+
 from abc import ABC, abstractmethod
 
 
